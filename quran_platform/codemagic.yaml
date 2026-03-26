@@ -1,0 +1,51 @@
+workflows:
+  # ─── iOS тестовая сборка ───
+  ios-test:
+    name: iOS Test Build
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      groups:
+        - ios_credentials
+      ios_signing:
+        distribution_type: development
+        bundle_identifier: com.quranplatform.quranPlatform
+    scripts:
+      - name: Set up local properties
+        script: echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Install CocoaPods
+        script: |
+          cd ios && pod install
+      - name: Set iOS deployment target
+        script: |
+          cd ios
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*/IPHONEOS_DEPLOYMENT_TARGET = 14.0/g' Runner.xcodeproj/project.pbxproj
+      - name: Build iOS (debug for testing)
+        script: |
+          flutter build ios --debug --no-codesign
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/ios/archive/*.xcarchive
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+
+  # ─── Android тестовая сборка ───
+  android-test:
+    name: Android Test Build
+    max_build_duration: 30
+    instance_type: mac_mini_m1
+    environment:
+      flutter: stable
+      java: 17
+    scripts:
+      - name: Get packages
+        script: flutter pub get
+      - name: Build APK
+        script: flutter build apk --debug
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
