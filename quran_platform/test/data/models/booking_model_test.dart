@@ -80,5 +80,17 @@ void main() {
       );
       expect(model, isA<BookingEntity>());
     });
+
+    test('fromEntity preserves null zoomLink', () {
+      final entity = BookingEntity(
+        id: 'b1', studentId: 's1', teacherId: 't1',
+        studentName: 'S', teacherName: 'T',
+        date: DateTime(2024, 1, 1), timeSlot: '10:00',
+        status: 'pending', discipline: 'Таджвид',
+      );
+
+      final model = BookingModel.fromEntity(entity);
+      expect(model.zoomLink, isNull);
+    });
   });
 }

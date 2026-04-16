@@ -121,6 +121,53 @@ void main() {
         );
         expect(b.isUpcoming, isFalse);
       });
+
+      test('invalid timeSlot format returns false', () {
+        final tomorrow = DateTime.now().add(const Duration(days: 1));
+        final b = BookingEntity(
+          id: '1', studentId: 's', teacherId: 't',
+          studentName: 'S', teacherName: 'T',
+          date: tomorrow, timeSlot: 'invalid',
+          status: 'confirmed', discipline: 'Таджвид',
+        );
+        expect(b.isUpcoming, isFalse);
+      });
+
+      test('non-numeric timeSlot returns false', () {
+        final tomorrow = DateTime.now().add(const Duration(days: 1));
+        final b = BookingEntity(
+          id: '1', studentId: 's', teacherId: 't',
+          studentName: 'S', teacherName: 'T',
+          date: tomorrow, timeSlot: 'ab:cd',
+          status: 'confirmed', discipline: 'Таджвид',
+        );
+        expect(b.isUpcoming, isFalse);
+      });
+
+      test('UTC date is correctly converted to local time', () {
+        // Используем UTC дату с далёким будущим — должно быть upcoming
+        final utcFuture = DateTime.utc(
+          DateTime.now().year + 1, 1, 1, 12, 0,
+        );
+        final b = BookingEntity(
+          id: '1', studentId: 's', teacherId: 't',
+          studentName: 'S', teacherName: 'T',
+          date: utcFuture, timeSlot: '12:00',
+          status: 'confirmed', discipline: 'Таджвид',
+        );
+        expect(b.isUpcoming, isTrue);
+      });
+
+      test('completed booking is NOT upcoming even if future', () {
+        final tomorrow = DateTime.now().add(const Duration(days: 1));
+        final b = BookingEntity(
+          id: '1', studentId: 's', teacherId: 't',
+          studentName: 'S', teacherName: 'T',
+          date: tomorrow, timeSlot: '10:00',
+          status: 'completed', discipline: 'Таджвид',
+        );
+        expect(b.isUpcoming, isFalse);
+      });
     });
 
     test('Equatable comparison works', () {
