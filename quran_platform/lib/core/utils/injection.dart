@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../services/analytics_service.dart';
+import '../services/crash_service.dart';
 
 import '../../data/datasources/auth_datasource.dart';
 import '../../data/datasources/booking_datasource.dart';
@@ -47,6 +52,12 @@ Future<void> configureDependencies() async {
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
   sl.registerLazySingleton(() => FirebaseStorage.instance);
   sl.registerLazySingleton(() => FirebaseMessaging.instance);
+  sl.registerLazySingleton(() => FirebaseCrashlytics.instance);
+  sl.registerLazySingleton(() => FirebaseAnalytics.instance);
+
+  // ─── Services (логирование) ───
+  sl.registerLazySingleton(() => CrashService(sl()));
+  sl.registerLazySingleton(() => AnalyticsService(sl()));
 
   final prefs = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => prefs);

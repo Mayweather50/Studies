@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/constants/app_constants.dart';
+import '../core/services/analytics_service.dart';
+import '../core/utils/injection.dart';
 import '../domain/entities/booking_entity.dart';
 import '../presentation/admin/screens/admin_login_screen.dart';
 import '../presentation/admin/screens/admin_shell.dart';
@@ -30,6 +32,7 @@ class AppRouter {
   late final GoRouter router = GoRouter(
     initialLocation: '/',
     debugLogDiagnostics: true,
+    observers: [sl<AnalyticsService>().observer],
     redirect: (context, state) {
       final authState = authBloc.state;
       final isAuth = authState is AuthAuthenticated;
