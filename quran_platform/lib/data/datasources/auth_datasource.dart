@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -68,24 +70,34 @@ class AuthDataSourceImpl implements AuthDataSource {
   @override
   Future<String> signInWithPhone(String phoneNumber) async {
     try {
-      String verificationId = '';
+      final completer = Completer<String>();
 
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         verificationCompleted: (_) {},
         verificationFailed: (e) {
-          throw AuthException(e.message ?? 'Ошибка верификации');
+          if (!completer.isCompleted) {
+            completer.completeError(
+              AuthException(e.message ?? 'Ошибка верификации'),
+            );
+          }
         },
         codeSent: (id, _) {
-          verificationId = id;
+          if (!completer.isCompleted) {
+            completer.complete(id);
+          }
         },
-        codeAutoRetrievalTimeout: (_) {},
+        codeAutoRetrievalTimeout: (_) {
+          if (!completer.isCompleted) {
+            completer.completeError(
+              const AuthException('Время ожидания SMS истекло'),
+            );
+          }
+        },
         timeout: const Duration(seconds: 60),
       );
 
-      // Wait a bit for the callback
-      await Future.delayed(const Duration(seconds: 2));
-      return verificationId;
+      return completer.future;
     } on FirebaseAuthException catch (e) {
       throw AuthException(e.message ?? 'Ошибка отправки SMS');
     }

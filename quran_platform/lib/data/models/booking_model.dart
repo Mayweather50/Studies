@@ -25,7 +25,9 @@ class BookingModel extends BookingEntity {
       teacherId: data['teacherId'] ?? '',
       studentName: data['studentName'] ?? '',
       teacherName: data['teacherName'] ?? '',
-      date: (data['date'] as Timestamp).toDate(),
+      date: data['date'] != null
+          ? (data['date'] as Timestamp).toDate()
+          : DateTime.now(),
       timeSlot: data['timeSlot'] ?? '',
       status: data['status'] ?? 'pending',
       zoomLink: data['zoomLink'],

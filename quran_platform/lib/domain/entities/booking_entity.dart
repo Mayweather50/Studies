@@ -35,9 +35,14 @@ class BookingEntity extends Equatable {
   bool get isUpcoming {
     final now = DateTime.now();
     final parts = timeSlot.split(':');
+    if (parts.length < 2) return false;
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return false;
+    final localDate = date.toLocal();
     final slotDateTime = DateTime(
-      date.year, date.month, date.day,
-      int.parse(parts[0]), int.parse(parts[1]),
+      localDate.year, localDate.month, localDate.day,
+      hour, minute,
     );
     return slotDateTime.isAfter(now) && (isConfirmed || isPending);
   }
